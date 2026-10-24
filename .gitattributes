@@ -1,0 +1,2 @@
+# Keep line endings deterministic so CI and Windows checkouts agree.
+* text=auto eol=lf

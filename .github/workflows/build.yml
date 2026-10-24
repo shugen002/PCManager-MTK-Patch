@@ -1,0 +1,74 @@
+name: build
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # Server 2025 is build 26100, the same generation as Windows 11 24H2+ -- the
+    # export table comes from the runner's own winmm.dll, so use a runner that
+    # matches the machines this DLL is meant for.
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Environment
+        shell: pwsh
+        run: |
+          "OS: $([Environment]::OSVersion.VersionString)"
+          $w = Get-Item "$env:SystemRoot\System32\winmm.dll"
+          "winmm.dll: $($w.VersionInfo.FileVersion)  sha256=$((Get-FileHash $w.FullName -Algorithm SHA256).Hash.ToLower())"
+
+      - name: Configure
+        run: cmake -S . -B build -A x64
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      # The shim replaces winmm.dll, so the built file must export exactly the
+      # table of the winmm.dll it forwards to -- a missing or renamed export
+      # would break unrelated PC Manager components.
+      - name: Verify export table
+        run: >
+          python generator/gen_winmm_shim.py
+          --check build/Release/winmm.dll
+
+      - name: Report artifact hash
+        shell: pwsh
+        run: |
+          $dll = "build\Release\winmm.dll"
+          $item = Get-Item $dll
+          "winmm.dll  $($item.Length) bytes  sha256=$((Get-FileHash $dll -Algorithm SHA256).Hash.ToLower())"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: winmm-mt7922-hci
+          path: build/Release/winmm.dll
+          if-no-files-found: error
+
+      # Tag a commit (v1.0.0, ...) and the DLL becomes a downloadable release.
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create "${{ github.ref_name }}"
+          build/Release/winmm.dll
+          --title "MTK-Patch ${{ github.ref_name }}"
+          --notes "Huawei PC Manager 在 MediaTek MT7922 上的 BLE 广播补丁。把 winmm.dll 放进 PC Manager 安装目录。"
+

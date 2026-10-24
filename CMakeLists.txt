@@ -51,9 +51,11 @@ add_custom_target(gen_winmm_stubs DEPENDS
 # ---------------------------------------------------------------------------
 add_library(winmm SHARED
   src/proxy.cpp
+  src/install.cpp
   src/mtk_hci.cpp
   src/hci_adv.cpp
   src/realtek_hooks.cpp
+  src/wlan_fix.cpp
   "${GEN_ASM}"
   "${GEN_DEF}")
 

@@ -1,6 +1,11 @@
 # MTK-Patch
 
+> AMD 怎么你了，我就是要用！
+
 利用华为电脑关键会默认回落到Realtek蓝牙网卡处理的特性，通过拦截原来 Realtek 的操作，转到 MT7922 的厂商HCI通道，从而让华为电脑管家能够正常收发 BLE 广播。
+
+![100% Vibe Coding](https://img.shields.io/badge/100%25-Vibe%20Coding-%23ad46ff?style=for-the-badge&labelColor=%231a0b2e&logo=sparkles&logoColor=%23f0abfc)
+![Coding Witth dsv41flash](https://img.shields.io/badge/Coding_With-DeepSeek_V4.1%20Flash-%230088ff?style=for-the-badge&labelColor=%230a2540&logo=deepseek&logoColor=%23ffffff)
 
 ## 安装
 

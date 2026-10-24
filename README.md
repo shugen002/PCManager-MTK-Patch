@@ -1,41 +1,27 @@
 # MTK-Patch
 
-让装了 **MediaTek MT7922** 网卡的电脑，在用华为 PC Manager 时能正常广播蓝牙 ——
-不然「多屏协同 / 华为分享」根本扫不到这台电脑。
-
-补丁就是 PC Manager 目录下的一个 `winmm.dll`：它照常转发所有系统调用，只在检测到
-这颗网卡时，把华为本来要发的广播改从 MT7922 自己的蓝牙通道发出去。
+利用华为电脑关键会默认回落到Realtek蓝牙网卡处理的特性，通过拦截原来 Realtek 的操作，转到 MT7922 的厂商HCI通道，从而让华为电脑管家能够正常收发 BLE 广播。
 
 ## 安装
 
 1. 打开 [Releases](../../releases)，下载最新版的 `winmm.dll`。
 2. 找到 PC Manager 的安装目录（通常是 `C:\Program Files\Huawei\PCManager`，
    确认里面有 `HiConnectivityService.exe`）。
-3. 用**管理员** PowerShell 执行：
-
-```powershell
-Stop-Service HiConnectivityService -Force
-Copy-Item .\winmm.dll "C:\Program Files\Huawei\PCManager\" -Force
-Start-Service HiConnectivityService
-```
-
-4. 重新打开 PC Manager 的多屏协同，手机上应该就能看到这台电脑了。
+3. 将下载的 `winmm.dll` 放到 PC Manager 的安装目录下
+4. 在任务管理器中，重启 HiConnectivityService 服务
 
 ## 卸载
 
-```powershell
-Stop-Service HiConnectivityService -Force
-Remove-Item "C:\Program Files\Huawei\PCManager\winmm.dll"
-Start-Service HiConnectivityService
-```
+1. 在任务管理器中，停止 HiConnectivityService 服务
+2. 删除 PC Manager 安装目录下的 `winmm.dll`（通常是 `C:\Program Files\Huawei\PCManager\winmm.dll`）
+3. 重启 HiConnectivityService 服务
 
 ## 注意
 
-- 只对 MT7922 生效。没有这颗网卡（`\\.\MTKBTFilter` 设备不存在）时它就是个普通
-  的 winmm 转发层，什么都不会改。
+- 只对 MT7922 及其马甲型号(如`RZ616`)生效，其他网卡不会受到影响。
 - 日志：`C:\ProgramData\MTK-Patch\mt7922_hci.log`
-- PC Manager 升级可能把这个文件覆盖掉，重装一次就行。
-- 杀毒软件可能对「程序目录下放了个同名系统 DLL」报警，放行即可。
+- 只测试了 RZ616 型号，其他马甲型号未验证。
+- `华为分享` 功能依赖经典蓝牙的 GATT 服务，暂时不支持。
 
 ## 从源码构建
 

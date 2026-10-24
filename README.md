@@ -4,22 +4,19 @@
 
 利用华为电脑关键会默认回落到Realtek蓝牙网卡处理的特性，通过拦截原来 Realtek 的操作，转到 MT7922 的厂商HCI通道，从而让华为电脑管家能够正常收发 BLE 广播。
 
-另外修复了 PC Manager 把已开启的 WLAN 误判成关闭、界面提示「点击开启 WLAN」的问题。
-
 ![100% Vibe Coding](https://img.shields.io/badge/100%25-Vibe%20Coding-%23ad46ff?style=for-the-badge&labelColor=%231a0b2e&logo=sparkles&logoColor=%23f0abfc)
 ![Coding With dsv41flash](https://img.shields.io/badge/Coding_With-DeepSeek_V4.1%20Flash-%230088ff?style=for-the-badge&labelColor=%230a2540&logo=deepseek&logoColor=%23ffffff)
 
 ## 安装
 
 1. 打开 [Releases](../../releases)，下载最新版的 `winmm.dll`。
-2. 找到 PC Manager 的安装目录（通常是 `C:\Program Files\Huawei\PCManager`，
-   确认里面有 `HiConnectivityService.exe`）。
+2. 找到 PC Manager 的安装目录（通常是 `C:\Program Files\Huawei\PCManager`，确认里面有 `HiConnectivityService.exe`）。
 3. 将下载的 `winmm.dll` 放到 PC Manager 的安装目录下
 4. 在任务管理器中，重启 HiConnectivityService 服务
 
 ## 卸载或更新
 
-1. 在任务管理器中，关闭所有华为系的服务，包括 HiConnectivityService
+1. 退出电脑管家及华为控制中心，并停止所有华为系的服务，包括 HiConnectivityService 等。(好多，`HwDistributedMainService` `HwPCCoreService` `MBAMainService` `HMSCoreService`，如果反复重启，就先停别的服务再停 HiConnectivityService，他们是互相唤起的)
 2. 删除或替换 PC Manager 安装目录下的 `winmm.dll`（通常是 `C:\Program Files\Huawei\PCManager\winmm.dll`）
 3. 重启 HiConnectivityService 服务
 
